@@ -1,6 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Outlet } from "react-router-dom";
+import { CopilotFAB } from "@/components/CopilotFAB";
 
 export function AppLayout() {
   return (
@@ -18,6 +19,7 @@ export function AppLayout() {
             <Outlet />
           </main>
         </div>
+        <CopilotFAB />
       </div>
     </SidebarProvider>
   );

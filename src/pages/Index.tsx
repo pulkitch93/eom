@@ -1,7 +1,9 @@
-import { Landmark, Leaf, DollarSign, TrendingUp, Activity } from "lucide-react";
+import { useState } from "react";
+import { Landmark, Leaf, DollarSign, TrendingUp, Activity, BrainCircuit, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CopilotPanel } from "@/components/CopilotPanel";
 import { StatCard } from "@/components/StatCard";
 import {
   obligations,
@@ -32,6 +34,7 @@ import { useNavigate } from "react-router-dom";
 const STATUS_COLORS = ["hsl(187, 60%, 38%)", "hsl(38, 92%, 50%)", "hsl(152, 55%, 42%)", "hsl(215, 14%, 50%)"];
 
 const Dashboard = () => {
+  const [copilotOpen, setCopilotOpen] = useState(false);
   const navigate = useNavigate();
   const totalARO = getTotalLiability("ARO");
   const totalERO = getTotalLiability("ERO");
@@ -166,6 +169,35 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
+      {/* AI Copilot Widget */}
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/30">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <BrainCircuit className="h-4 w-4 text-primary" /> EOM Intelligence Copilot
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-xs text-muted-foreground mb-3">
+            CFO-grade AI analysis across your environmental liability portfolio. Get instant insights on risk, forecasts, variances, and compliance.
+          </p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {["Why did liability increase 12% in Q3?", "Which sites are at highest financial risk?", "Show top 5 exposure drivers."].map((prompt) => (
+              <button
+                key={prompt}
+                onClick={() => setCopilotOpen(true)}
+                className="text-[11px] px-2.5 py-1.5 rounded-md border border-border/60 hover:bg-accent/50 hover:border-primary/30 transition-colors flex items-center gap-1"
+              >
+                <Sparkles className="h-3 w-3 text-primary" />
+                {prompt}
+              </button>
+            ))}
+          </div>
+          <Button size="sm" onClick={() => setCopilotOpen(true)} className="gap-1.5">
+            <BrainCircuit className="h-3.5 w-3.5" /> Open Copilot
+          </Button>
+        </CardContent>
+      </Card>
+      <CopilotPanel open={copilotOpen} onOpenChange={setCopilotOpen} />
     </div>
   );
 };
