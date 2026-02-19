@@ -598,3 +598,280 @@ export function getAllAssets() {
   });
   return result;
 }
+
+// ============================================================
+// Plan Module - Multi-year forecasting, liability modeling, cost projections, budget alignment
+// ============================================================
+
+export interface ForecastScenario {
+  id: string;
+  name: string;
+  description: string;
+  inflationRate: number;
+  discountRate: number;
+  projections: { year: number; aroLiability: number; eroLiability: number; accretion: number; settlements: number; netChange: number }[];
+}
+
+export interface BudgetItem {
+  id: string;
+  category: string;
+  obligationId: string;
+  obligationName: string;
+  siteName: string;
+  budgetedAmount: number;
+  forecastAmount: number;
+  variance: number;
+  variancePercent: number;
+  fiscalYear: number;
+  notes: string;
+}
+
+export const forecastScenarios: ForecastScenario[] = [
+  {
+    id: "SCN-BASE", name: "Base Case", description: "Current discount rates, 2.5% inflation, no new obligations",
+    inflationRate: 0.025, discountRate: 0.05,
+    projections: [
+      { year: 2026, aroLiability: 11717000, eroLiability: 5490000, accretion: 661000, settlements: 0, netChange: 661000 },
+      { year: 2027, aroLiability: 12300000, eroLiability: 5100000, accretion: 693000, settlements: 740000, netChange: -47000 },
+      { year: 2028, aroLiability: 12900000, eroLiability: 4500000, accretion: 728000, settlements: 920000, netChange: -192000 },
+      { year: 2029, aroLiability: 13500000, eroLiability: 3800000, accretion: 764000, settlements: 1380000, netChange: -616000 },
+      { year: 2030, aroLiability: 13200000, eroLiability: 3200000, accretion: 750000, settlements: 412000, netChange: 338000 },
+      { year: 2031, aroLiability: 12800000, eroLiability: 2800000, accretion: 720000, settlements: 375000, netChange: 345000 },
+      { year: 2032, aroLiability: 12300000, eroLiability: 2400000, accretion: 690000, settlements: 0, netChange: 690000 },
+      { year: 2033, aroLiability: 11200000, eroLiability: 2100000, accretion: 640000, settlements: 1050000, netChange: -410000 },
+      { year: 2034, aroLiability: 10000000, eroLiability: 1500000, accretion: 580000, settlements: 2450000, netChange: -1870000 },
+      { year: 2035, aroLiability: 8500000, eroLiability: 1200000, accretion: 500000, settlements: 2847000, netChange: -2347000 },
+    ],
+  },
+  {
+    id: "SCN-HIGH", name: "High Inflation", description: "4% inflation, higher cost escalation on unsettled obligations",
+    inflationRate: 0.04, discountRate: 0.05,
+    projections: [
+      { year: 2026, aroLiability: 11717000, eroLiability: 5490000, accretion: 661000, settlements: 0, netChange: 661000 },
+      { year: 2027, aroLiability: 12800000, eroLiability: 5400000, accretion: 720000, settlements: 740000, netChange: -20000 },
+      { year: 2028, aroLiability: 13900000, eroLiability: 5000000, accretion: 800000, settlements: 920000, netChange: -120000 },
+      { year: 2029, aroLiability: 15100000, eroLiability: 4400000, accretion: 880000, settlements: 1380000, netChange: -500000 },
+      { year: 2030, aroLiability: 15500000, eroLiability: 3900000, accretion: 920000, settlements: 412000, netChange: 508000 },
+      { year: 2031, aroLiability: 15800000, eroLiability: 3500000, accretion: 950000, settlements: 375000, netChange: 575000 },
+      { year: 2032, aroLiability: 15600000, eroLiability: 3100000, accretion: 940000, settlements: 0, netChange: 940000 },
+      { year: 2033, aroLiability: 14800000, eroLiability: 2800000, accretion: 900000, settlements: 1050000, netChange: -150000 },
+      { year: 2034, aroLiability: 13500000, eroLiability: 2200000, accretion: 830000, settlements: 2450000, netChange: -1620000 },
+      { year: 2035, aroLiability: 11800000, eroLiability: 1800000, accretion: 740000, settlements: 2847000, netChange: -2107000 },
+    ],
+  },
+  {
+    id: "SCN-ACCEL", name: "Accelerated Settlement", description: "Aggressive settlement timeline, early decommissioning",
+    inflationRate: 0.025, discountRate: 0.05,
+    projections: [
+      { year: 2026, aroLiability: 11717000, eroLiability: 5490000, accretion: 661000, settlements: 1152000, netChange: -491000 },
+      { year: 2027, aroLiability: 11200000, eroLiability: 4600000, accretion: 620000, settlements: 2840000, netChange: -2220000 },
+      { year: 2028, aroLiability: 10100000, eroLiability: 3500000, accretion: 540000, settlements: 3370000, netChange: -2830000 },
+      { year: 2029, aroLiability: 8500000, eroLiability: 2400000, accretion: 430000, settlements: 3200000, netChange: -2770000 },
+      { year: 2030, aroLiability: 6800000, eroLiability: 1500000, accretion: 340000, settlements: 2500000, netChange: -2160000 },
+      { year: 2031, aroLiability: 5200000, eroLiability: 800000, accretion: 260000, settlements: 2000000, netChange: -1740000 },
+      { year: 2032, aroLiability: 3800000, eroLiability: 400000, accretion: 190000, settlements: 1600000, netChange: -1410000 },
+      { year: 2033, aroLiability: 2200000, eroLiability: 100000, accretion: 110000, settlements: 1500000, netChange: -1390000 },
+      { year: 2034, aroLiability: 800000, eroLiability: 0, accretion: 40000, settlements: 1500000, netChange: -1460000 },
+      { year: 2035, aroLiability: 0, eroLiability: 0, accretion: 0, settlements: 800000, netChange: -800000 },
+    ],
+  },
+];
+
+export const budgetItems: BudgetItem[] = [
+  { id: "BDG-001", category: "Decommissioning", obligationId: "OBL-001", obligationName: "Tank Farm Decommissioning", siteName: "Eagle Ford Basin", budgetedAmount: 300000, forecastAmount: 320000, variance: -20000, variancePercent: -6.7, fiscalYear: 2026, notes: "Pre-decommissioning engineering studies" },
+  { id: "BDG-002", category: "Well P&A", obligationId: "OBL-003", obligationName: "Well B-1 Plugging", siteName: "Eagle Ford Basin", budgetedAmount: 180000, forecastAmount: 195000, variance: -15000, variancePercent: -8.3, fiscalYear: 2026, notes: "Plug & abandonment contractor mobilization" },
+  { id: "BDG-003", category: "Remediation", obligationId: "OBL-007", obligationName: "Pond Remediation", siteName: "Permian Basin", budgetedAmount: 450000, forecastAmount: 420000, variance: 30000, variancePercent: 6.7, fiscalYear: 2026, notes: "Liner replacement and soil removal phase" },
+  { id: "BDG-004", category: "Remediation", obligationId: "OBL-008", obligationName: "Soil Contamination Cleanup", siteName: "Eagle Ford Basin", budgetedAmount: 250000, forecastAmount: 280000, variance: -30000, variancePercent: -12.0, fiscalYear: 2026, notes: "Excavation and off-site disposal" },
+  { id: "BDG-005", category: "Monitoring", obligationId: "OBL-009", obligationName: "Groundwater Treatment", siteName: "Appalachian Basin", budgetedAmount: 200000, forecastAmount: 210000, variance: -10000, variancePercent: -5.0, fiscalYear: 2026, notes: "O&M for pump-and-treat system" },
+  { id: "BDG-006", category: "Decommissioning", obligationId: "OBL-005", obligationName: "Compressor Removal", siteName: "Permian Basin", budgetedAmount: 150000, forecastAmount: 140000, variance: 10000, variancePercent: 6.7, fiscalYear: 2026, notes: "Site assessment and planning" },
+  { id: "BDG-007", category: "Marine", obligationId: "OBL-011", obligationName: "Marine Terminal Dismantlement", siteName: "Gulf Coast Terminal", budgetedAmount: 500000, forecastAmount: 550000, variance: -50000, variancePercent: -10.0, fiscalYear: 2026, notes: "Phase 1 structural assessment" },
+  { id: "BDG-008", category: "Remediation", obligationId: "OBL-012", obligationName: "Tank Battery Cleanup", siteName: "Gulf Coast Terminal", budgetedAmount: 120000, forecastAmount: 115000, variance: 5000, variancePercent: 4.2, fiscalYear: 2026, notes: "Phase II ESA and delineation" },
+];
+
+// ============================================================
+// Settlement Module - Project cost tracking, vendor payments, budget vs actuals, financial closure
+// ============================================================
+
+export interface SettlementProject {
+  id: string;
+  obligationId: string;
+  obligationName: string;
+  siteName: string;
+  type: ObligationType;
+  status: "Planning" | "In Progress" | "Pending Closure" | "Closed";
+  totalBudget: number;
+  totalSpent: number;
+  totalCommitted: number;
+  startDate: string;
+  estimatedEndDate: string;
+  projectManager: string;
+  completionPercent: number;
+  vendors: VendorPayment[];
+  costItems: CostItem[];
+}
+
+export interface VendorPayment {
+  id: string;
+  vendorName: string;
+  description: string;
+  contractAmount: number;
+  invoicedAmount: number;
+  paidAmount: number;
+  retainage: number;
+  status: "Active" | "Complete" | "Pending";
+  lastPaymentDate: string;
+}
+
+export interface CostItem {
+  id: string;
+  category: string;
+  description: string;
+  budgeted: number;
+  actual: number;
+  committed: number;
+  variance: number;
+}
+
+export const settlementProjects: SettlementProject[] = [
+  {
+    id: "STTL-001", obligationId: "OBL-013", obligationName: "Pipeline G Retirement", siteName: "Appalachian Basin", type: "ARO",
+    status: "Closed", totalBudget: 620000, totalSpent: 587000, totalCommitted: 587000,
+    startDate: "2023-07-01", estimatedEndDate: "2024-06-30", projectManager: "Tom Williams", completionPercent: 100,
+    vendors: [
+      { id: "VP-001", vendorName: "Enviro Solutions Inc.", description: "Pipeline removal and disposal", contractAmount: 380000, invoicedAmount: 380000, paidAmount: 380000, retainage: 0, status: "Complete", lastPaymentDate: "2024-05-15" },
+      { id: "VP-002", vendorName: "GeoTech Consulting", description: "Environmental monitoring", contractAmount: 85000, invoicedAmount: 85000, paidAmount: 85000, retainage: 0, status: "Complete", lastPaymentDate: "2024-06-20" },
+    ],
+    costItems: [
+      { id: "CI-001", category: "Contractor Labor", description: "Pipeline removal crews", budgeted: 280000, actual: 275000, committed: 275000, variance: 5000 },
+      { id: "CI-002", category: "Equipment", description: "Heavy equipment rental", budgeted: 120000, actual: 115000, committed: 115000, variance: 5000 },
+      { id: "CI-003", category: "Disposal", description: "Material transport & disposal", budgeted: 95000, actual: 92000, committed: 92000, variance: 3000 },
+      { id: "CI-004", category: "Monitoring", description: "Environmental sampling", budgeted: 85000, actual: 72000, committed: 72000, variance: 13000 },
+      { id: "CI-005", category: "Admin", description: "Permits and regulatory fees", budgeted: 40000, actual: 33000, committed: 33000, variance: 7000 },
+    ],
+  },
+  {
+    id: "STTL-002", obligationId: "OBL-007", obligationName: "Pond Remediation", siteName: "Permian Basin", type: "ERO",
+    status: "In Progress", totalBudget: 1380000, totalSpent: 621000, totalCommitted: 890000,
+    startDate: "2024-01-15", estimatedEndDate: "2029-12-31", projectManager: "Lisa Patel", completionPercent: 45,
+    vendors: [
+      { id: "VP-003", vendorName: "Western Remediation Co.", description: "Pond closure and soil remediation", contractAmount: 850000, invoicedAmount: 420000, paidAmount: 390000, retainage: 30000, status: "Active", lastPaymentDate: "2026-01-10" },
+      { id: "VP-004", vendorName: "AquaMonitor LLC", description: "Groundwater monitoring program", contractAmount: 180000, invoicedAmount: 95000, paidAmount: 95000, retainage: 0, status: "Active", lastPaymentDate: "2025-12-15" },
+      { id: "VP-005", vendorName: "LinerTech Systems", description: "Liner replacement", contractAmount: 220000, invoicedAmount: 136000, paidAmount: 136000, retainage: 0, status: "Active", lastPaymentDate: "2025-11-28" },
+    ],
+    costItems: [
+      { id: "CI-006", category: "Remediation", description: "Soil excavation and removal", budgeted: 450000, actual: 280000, committed: 420000, variance: 30000 },
+      { id: "CI-007", category: "Liner", description: "Liner removal and replacement", budgeted: 280000, actual: 180000, committed: 250000, variance: 30000 },
+      { id: "CI-008", category: "Monitoring", description: "Groundwater sampling and analysis", budgeted: 200000, actual: 95000, committed: 140000, variance: 60000 },
+      { id: "CI-009", category: "Disposal", description: "Contaminated soil disposal", budgeted: 320000, actual: 52000, committed: 60000, variance: 260000 },
+      { id: "CI-010", category: "Admin", description: "Regulatory reporting and permits", budgeted: 130000, actual: 14000, committed: 20000, variance: 110000 },
+    ],
+  },
+  {
+    id: "STTL-003", obligationId: "OBL-003", obligationName: "Well B-1 Plugging", siteName: "Eagle Ford Basin", type: "ARO",
+    status: "Planning", totalBudget: 412000, totalSpent: 28000, totalCommitted: 45000,
+    startDate: "2026-06-01", estimatedEndDate: "2030-03-31", projectManager: "Mark Henderson", completionPercent: 5,
+    vendors: [
+      { id: "VP-006", vendorName: "Texas Well Services", description: "Well P&A operations", contractAmount: 290000, invoicedAmount: 0, paidAmount: 0, retainage: 0, status: "Pending", lastPaymentDate: "" },
+      { id: "VP-007", vendorName: "SafeEnviro Labs", description: "Pre-closure environmental assessment", contractAmount: 45000, invoicedAmount: 28000, paidAmount: 28000, retainage: 0, status: "Active", lastPaymentDate: "2026-01-20" },
+    ],
+    costItems: [
+      { id: "CI-011", category: "Assessment", description: "Pre-closure site assessment", budgeted: 50000, actual: 28000, committed: 45000, variance: 5000 },
+      { id: "CI-012", category: "P&A Operations", description: "Plugging and cement", budgeted: 220000, actual: 0, committed: 0, variance: 220000 },
+      { id: "CI-013", category: "Site Restoration", description: "Surface restoration", budgeted: 85000, actual: 0, committed: 0, variance: 85000 },
+      { id: "CI-014", category: "Monitoring", description: "Post-closure monitoring", budgeted: 57000, actual: 0, committed: 0, variance: 57000 },
+    ],
+  },
+  {
+    id: "STTL-004", obligationId: "OBL-012", obligationName: "Tank Battery Cleanup", siteName: "Gulf Coast Terminal", type: "ERO",
+    status: "In Progress", totalBudget: 740000, totalSpent: 74000, totalCommitted: 185000,
+    startDate: "2025-06-01", estimatedEndDate: "2027-12-31", projectManager: "David Kim", completionPercent: 10,
+    vendors: [
+      { id: "VP-008", vendorName: "Gulf Environmental Services", description: "Phase II ESA and remediation", contractAmount: 520000, invoicedAmount: 52000, paidAmount: 52000, retainage: 0, status: "Active", lastPaymentDate: "2025-12-10" },
+      { id: "VP-009", vendorName: "LabCorp Environmental", description: "Analytical testing", contractAmount: 65000, invoicedAmount: 22000, paidAmount: 22000, retainage: 0, status: "Active", lastPaymentDate: "2025-11-15" },
+    ],
+    costItems: [
+      { id: "CI-015", category: "Assessment", description: "Phase II ESA", budgeted: 120000, actual: 52000, committed: 85000, variance: 35000 },
+      { id: "CI-016", category: "Remediation", description: "Soil treatment", budgeted: 380000, actual: 0, committed: 60000, variance: 320000 },
+      { id: "CI-017", category: "Monitoring", description: "Sampling and analysis", budgeted: 140000, actual: 22000, committed: 40000, variance: 100000 },
+      { id: "CI-018", category: "Admin", description: "Reporting and oversight", budgeted: 100000, actual: 0, committed: 0, variance: 100000 },
+    ],
+  },
+];
+
+// ============================================================
+// Assurance Module - Reporting, controls, audit trail, financial disclosure
+// ============================================================
+
+export interface AuditTrailEntry {
+  id: string;
+  timestamp: string;
+  user: string;
+  action: string;
+  entity: string;
+  entityId: string;
+  details: string;
+  category: "Obligation" | "Financial" | "Compliance" | "Settlement" | "System";
+}
+
+export interface ControlItem {
+  id: string;
+  controlName: string;
+  description: string;
+  category: string;
+  frequency: string;
+  owner: string;
+  status: "Effective" | "Needs Improvement" | "Deficient" | "Not Tested";
+  lastTestedDate: string;
+  nextTestDate: string;
+  findings: string;
+  riskRating: "Low" | "Medium" | "High";
+}
+
+export interface DisclosureItem {
+  id: string;
+  standard: string;
+  requirement: string;
+  description: string;
+  status: "Complete" | "In Progress" | "Not Started" | "N/A";
+  responsibleParty: string;
+  dueDate: string;
+  completedDate?: string;
+  notes: string;
+}
+
+export const auditTrail: AuditTrailEntry[] = [
+  { id: "AUD-001", timestamp: "2026-02-18 14:32:00", user: "Sarah Chen", action: "Liability Revised", entity: "Obligation", entityId: "OBL-011", details: "Marine Terminal Dismantlement liability revised upward by $200,000. New fair value: $3,650,000.", category: "Financial" },
+  { id: "AUD-002", timestamp: "2026-02-15 10:15:00", user: "Tom Williams", action: "Progress Updated", entity: "Obligation", entityId: "OBL-009", details: "Groundwater Treatment remediation progress updated from 55% to 60%.", category: "Obligation" },
+  { id: "AUD-003", timestamp: "2026-02-12 09:45:00", user: "Mark Henderson", action: "Status Changed", entity: "Obligation", entityId: "OBL-003", details: "Well B-1 Plugging status changed from Active to Under Review pending cost re-estimate.", category: "Obligation" },
+  { id: "AUD-004", timestamp: "2026-02-10 16:20:00", user: "Lisa Patel", action: "Cost Estimate Added", entity: "Obligation", entityId: "OBL-008", details: "New cost estimate of $280,000 added for soil excavation phase. Previous estimate was $250,000.", category: "Financial" },
+  { id: "AUD-005", timestamp: "2026-02-08 11:00:00", user: "System", action: "Accretion Posted", entity: "Financial", entityId: "ALL", details: "Monthly accretion expense of $55,083 posted across all active obligations.", category: "Financial" },
+  { id: "AUD-006", timestamp: "2026-02-05 13:30:00", user: "Angela Foster", action: "Discount Rate Updated", entity: "Obligation", entityId: "OBL-001", details: "Tank Farm Decommissioning discount rate updated from 5.0% to 5.5%.", category: "Financial" },
+  { id: "AUD-007", timestamp: "2026-02-03 08:15:00", user: "David Kim", action: "Vendor Payment", entity: "Settlement", entityId: "STTL-004", details: "Payment of $52,000 to Gulf Environmental Services for Phase II ESA services.", category: "Settlement" },
+  { id: "AUD-008", timestamp: "2026-01-30 14:45:00", user: "James Rodriguez", action: "Inspection Completed", entity: "Compliance", entityId: "S002", details: "Permian Basin site inspection completed. Under investigation status maintained.", category: "Compliance" },
+  { id: "AUD-009", timestamp: "2026-01-28 10:00:00", user: "Tom Williams", action: "Settlement Completed", entity: "Obligation", entityId: "OBL-013", details: "Pipeline G Retirement settlement completed. Final cost: $587,000 vs budget of $620,000.", category: "Settlement" },
+  { id: "AUD-010", timestamp: "2026-01-25 09:30:00", user: "System", action: "Report Generated", entity: "Financial", entityId: "RPT-Q4-2025", details: "Q4 2025 financial disclosure report generated. ARO: $11.7M, ERO: $5.5M.", category: "Financial" },
+  { id: "AUD-011", timestamp: "2026-01-22 15:00:00", user: "Lisa Patel", action: "Control Tested", entity: "Compliance", entityId: "CTL-003", details: "Quarterly discount rate review control tested. Result: Effective.", category: "Compliance" },
+  { id: "AUD-012", timestamp: "2026-01-18 11:20:00", user: "Sarah Chen", action: "Monitoring Sample", entity: "Compliance", entityId: "EXP-001", details: "Quarterly groundwater sampling completed at Eagle Ford Basin. 4 exceedances noted.", category: "Compliance" },
+];
+
+export const controlItems: ControlItem[] = [
+  { id: "CTL-001", controlName: "Obligation Completeness Review", description: "Annual review to ensure all ARO/ERO obligations are identified and recorded", category: "Financial Reporting", frequency: "Annual", owner: "Sarah Chen", status: "Effective", lastTestedDate: "2025-12-15", nextTestDate: "2026-12-15", findings: "No exceptions noted. All known obligations properly recorded.", riskRating: "High" },
+  { id: "CTL-002", controlName: "Fair Value Measurement Validation", description: "Review of assumptions and inputs used in fair value calculations for AROs", category: "Valuation", frequency: "Quarterly", owner: "Angela Foster", status: "Effective", lastTestedDate: "2025-12-31", nextTestDate: "2026-03-31", findings: "Discount rates and cost estimates validated against market data.", riskRating: "High" },
+  { id: "CTL-003", controlName: "Discount Rate Reasonableness", description: "Quarterly assessment of credit-adjusted risk-free rates used for discounting", category: "Valuation", frequency: "Quarterly", owner: "Lisa Patel", status: "Effective", lastTestedDate: "2026-01-22", nextTestDate: "2026-04-22", findings: "Rates within acceptable range. No adjustment needed.", riskRating: "Medium" },
+  { id: "CTL-004", controlName: "Settlement Cost Reconciliation", description: "Monthly reconciliation of actual settlement costs to budget and obligation balances", category: "Settlement", frequency: "Monthly", owner: "Tom Williams", status: "Effective", lastTestedDate: "2026-01-31", nextTestDate: "2026-02-28", findings: "Pipeline G Retirement closed within 5% of budget.", riskRating: "Medium" },
+  { id: "CTL-005", controlName: "Environmental Monitoring Compliance", description: "Verification that all required monitoring activities are performed on schedule", category: "Compliance", frequency: "Quarterly", owner: "David Kim", status: "Needs Improvement", lastTestedDate: "2025-12-20", nextTestDate: "2026-03-20", findings: "One monitoring event delayed by 2 weeks at Gulf Coast Terminal.", riskRating: "High" },
+  { id: "CTL-006", controlName: "Vendor Payment Authorization", description: "Review of vendor payment approvals and supporting documentation", category: "Settlement", frequency: "Monthly", owner: "Mark Henderson", status: "Effective", lastTestedDate: "2026-01-15", nextTestDate: "2026-02-15", findings: "All payments properly authorized with supporting invoices.", riskRating: "Low" },
+  { id: "CTL-007", controlName: "Accretion Expense Calculation", description: "Monthly verification of accretion expense calculations and journal entries", category: "Financial Reporting", frequency: "Monthly", owner: "Sarah Chen", status: "Effective", lastTestedDate: "2026-02-08", nextTestDate: "2026-03-08", findings: "Calculations verified. Auto-posted entries reconciled.", riskRating: "Medium" },
+  { id: "CTL-008", controlName: "Regulatory Deadline Tracking", description: "Weekly review of upcoming regulatory deadlines and reporting requirements", category: "Compliance", frequency: "Weekly", owner: "James Rodriguez", status: "Deficient", lastTestedDate: "2026-01-10", nextTestDate: "2026-02-28", findings: "Two reporting deadlines nearly missed. Process improvement needed.", riskRating: "High" },
+];
+
+export const disclosureItems: DisclosureItem[] = [
+  { id: "DSC-001", standard: "ASC 410-20", requirement: "Beginning balance rollforward", description: "Reconciliation of ARO beginning to ending balance", status: "Complete", responsibleParty: "Sarah Chen", dueDate: "2026-03-15", completedDate: "2026-02-10", notes: "Q4 2025 rollforward completed and reviewed." },
+  { id: "DSC-002", standard: "ASC 410-20", requirement: "Accretion expense disclosure", description: "Total accretion expense recognized during the period", status: "Complete", responsibleParty: "Sarah Chen", dueDate: "2026-03-15", completedDate: "2026-02-10", notes: "Annual accretion of $661K disclosed." },
+  { id: "DSC-003", standard: "ASC 410-20", requirement: "Revision in estimates", description: "Description and amount of upward/downward revisions", status: "In Progress", responsibleParty: "Angela Foster", dueDate: "2026-03-15", notes: "Documenting $480K net upward revision. Marine Terminal and Compressor revisions pending final review." },
+  { id: "DSC-004", standard: "ASC 410-20", requirement: "Fair value assumptions", description: "Key assumptions used in initial and subsequent fair value measurements", status: "In Progress", responsibleParty: "Lisa Patel", dueDate: "2026-03-15", notes: "Discount rate methodology and inflation assumptions under review." },
+  { id: "DSC-005", standard: "ASC 450-20", requirement: "Nature of contingency", description: "Description of environmental remediation obligations", status: "Complete", responsibleParty: "David Kim", dueDate: "2026-03-15", completedDate: "2026-02-05", notes: "Four active ERO sites described with contaminant types and regulatory drivers." },
+  { id: "DSC-006", standard: "ASC 450-20", requirement: "Estimated range of loss", description: "Range of possible losses for ERO obligations", status: "In Progress", responsibleParty: "David Kim", dueDate: "2026-03-15", notes: "Best estimate of $5.49M accrued. High-end range analysis in progress." },
+  { id: "DSC-007", standard: "ASC 450-20", requirement: "Regulatory and legal proceedings", description: "Status of regulatory actions and pending legal matters", status: "Not Started", responsibleParty: "James Rodriguez", dueDate: "2026-03-15", notes: "Awaiting legal counsel input on Permian Basin investigation." },
+  { id: "DSC-008", standard: "SEC Reg S-K", requirement: "Environmental capital expenditures", description: "Current and projected environmental capital expenditures", status: "Not Started", responsibleParty: "Angela Foster", dueDate: "2026-03-31", notes: "Pending completion of 2026 budget alignment." },
+];
