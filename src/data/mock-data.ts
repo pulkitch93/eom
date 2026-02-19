@@ -5,11 +5,35 @@
 export type ObligationType = "ARO" | "ERO";
 export type ObligationStatus = "Active" | "Under Review" | "Settled" | "Pending";
 export type RemediationPhase = "Assessment" | "Planning" | "Active Remediation" | "Monitoring" | "Closure";
+export type AssetCondition = "Good" | "Fair" | "Poor" | "Decommissioned";
+export type ComplianceStatus = "Compliant" | "Non-Compliant" | "Under Investigation" | "Pending Review";
+export type ExposureRiskLevel = "Low" | "Medium" | "High" | "Critical";
+
+export interface SiteContact {
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+}
 
 export interface Site {
   id: string;
   name: string;
   region: string;
+  // Site-level data capture
+  address: string;
+  latitude: number;
+  longitude: number;
+  siteType: string;
+  operatingStatus: string;
+  complianceStatus: ComplianceStatus;
+  lastInspectionDate: string;
+  nextInspectionDate: string;
+  regulatoryAgency: string;
+  permitNumbers: string[];
+  totalAcreage: number;
+  siteContacts: SiteContact[];
+  notes: string;
   facilities: Facility[];
 }
 
@@ -24,6 +48,59 @@ export interface Asset {
   id: string;
   name: string;
   facilityId: string;
+  // Asset-level fields
+  assetType: string;
+  installDate: string;
+  condition: AssetCondition;
+  usefulLifeYears: number;
+  remainingLifeYears: number;
+  originalCost: number;
+  netBookValue: number;
+  lastMaintenanceDate: string;
+  regulatoryCategory: string;
+}
+
+export interface EnvironmentalExposure {
+  id: string;
+  siteId: string;
+  siteName: string;
+  obligationId?: string;
+  obligationName?: string;
+  contaminantType: string;
+  mediaAffected: string[]; // soil, groundwater, surface water, air
+  exposureArea: number; // acres
+  riskLevel: ExposureRiskLevel;
+  estimatedCleanupCost: number;
+  regulatoryDriver: string;
+  discoveryDate: string;
+  reportingDeadline: string;
+  monitoringFrequency: string;
+  lastSampleDate: string;
+  exceedanceCount: number;
+  maxConcentration: string;
+  regulatoryLimit: string;
+  status: "Open" | "Monitoring" | "Remediation" | "Closed";
+  notes: string;
+}
+
+export interface AROTrackingEntry {
+  obligationId: string;
+  obligationName: string;
+  assetName: string;
+  siteName: string;
+  fairValue: number;
+  initialEstimate: number;
+  currentLiability: number;
+  accretionExpense: number;
+  cumulativeAccretion: number;
+  revisionImpact: number;
+  discountRate: number;
+  retirementDate: string;
+  yearsRemaining: number;
+  settlementProgress: number; // percent of funds set aside
+  lastReviewDate: string;
+  nextReviewDate: string;
+  reviewNotes: string;
 }
 
 export interface Obligation {
@@ -67,44 +144,103 @@ export interface ActivityItem {
 export const sites: Site[] = [
   {
     id: "S001", name: "Eagle Ford Basin", region: "Texas",
+    address: "1200 County Road 45, Karnes City, TX 78118",
+    latitude: 28.8853, longitude: -97.9006,
+    siteType: "Production & Processing",
+    operatingStatus: "Active Operations",
+    complianceStatus: "Compliant",
+    lastInspectionDate: "2025-11-15",
+    nextInspectionDate: "2026-05-15",
+    regulatoryAgency: "Texas Railroad Commission (RRC)",
+    permitNumbers: ["RRC-45892", "TCEQ-WQ0015234"],
+    totalAcreage: 2400,
+    siteContacts: [
+      { name: "Mark Henderson", role: "Site Manager", email: "m.henderson@eom.com", phone: "(361) 555-0142" },
+      { name: "Sarah Chen", role: "Environmental Lead", email: "s.chen@eom.com", phone: "(361) 555-0198" },
+    ],
+    notes: "Primary production site. Two wellpads and one processing facility. Active soil remediation near tank farm.",
     facilities: [
       { id: "F001", name: "Processing Plant Alpha", siteId: "S001", assets: [
-        { id: "A001", name: "Storage Tank Farm", facilityId: "F001" },
-        { id: "A002", name: "Pipeline Network A", facilityId: "F001" },
+        { id: "A001", name: "Storage Tank Farm", facilityId: "F001", assetType: "Storage", installDate: "2012-06-15", condition: "Fair", usefulLifeYears: 30, remainingLifeYears: 16, originalCost: 8500000, netBookValue: 4250000, lastMaintenanceDate: "2025-09-20", regulatoryCategory: "Aboveground Storage" },
+        { id: "A002", name: "Pipeline Network A", facilityId: "F001", assetType: "Pipeline", installDate: "2013-03-01", condition: "Good", usefulLifeYears: 35, remainingLifeYears: 22, originalCost: 12000000, netBookValue: 7500000, lastMaintenanceDate: "2025-11-10", regulatoryCategory: "Gathering Pipeline" },
       ]},
       { id: "F002", name: "Wellpad Cluster B", siteId: "S001", assets: [
-        { id: "A003", name: "Well B-1", facilityId: "F002" },
-        { id: "A004", name: "Well B-2", facilityId: "F002" },
+        { id: "A003", name: "Well B-1", facilityId: "F002", assetType: "Well", installDate: "2015-08-20", condition: "Fair", usefulLifeYears: 20, remainingLifeYears: 9, originalCost: 4200000, netBookValue: 1890000, lastMaintenanceDate: "2025-06-15", regulatoryCategory: "Oil & Gas Well" },
+        { id: "A004", name: "Well B-2", facilityId: "F002", assetType: "Well", installDate: "2015-08-20", condition: "Good", usefulLifeYears: 20, remainingLifeYears: 10, originalCost: 4000000, netBookValue: 2000000, lastMaintenanceDate: "2025-07-22", regulatoryCategory: "Oil & Gas Well" },
       ]},
     ],
   },
   {
     id: "S002", name: "Permian Basin", region: "New Mexico",
+    address: "8900 State Hwy 128, Jal, NM 88252",
+    latitude: 32.1127, longitude: -103.1938,
+    siteType: "Gathering & Disposal",
+    operatingStatus: "Active Operations",
+    complianceStatus: "Under Investigation",
+    lastInspectionDate: "2025-09-22",
+    nextInspectionDate: "2026-03-22",
+    regulatoryAgency: "NM Energy, Minerals & Natural Resources Dept",
+    permitNumbers: ["NMOCD-28471", "NMED-GW-2024-015"],
+    totalAcreage: 1800,
+    siteContacts: [
+      { name: "James Rodriguez", role: "Site Manager", email: "j.rodriguez@eom.com", phone: "(575) 555-0231" },
+      { name: "Lisa Patel", role: "Compliance Officer", email: "l.patel@eom.com", phone: "(575) 555-0265" },
+    ],
+    notes: "Under investigation for groundwater impacts near evaporation pond. Enhanced monitoring in place.",
     facilities: [
       { id: "F003", name: "Gathering Station C", siteId: "S002", assets: [
-        { id: "A005", name: "Compressor Station", facilityId: "F003" },
+        { id: "A005", name: "Compressor Station", facilityId: "F003", assetType: "Compression", installDate: "2010-04-10", condition: "Fair", usefulLifeYears: 25, remainingLifeYears: 9, originalCost: 6500000, netBookValue: 2340000, lastMaintenanceDate: "2025-10-05", regulatoryCategory: "Compression Facility" },
       ]},
       { id: "F004", name: "Disposal Facility D", siteId: "S002", assets: [
-        { id: "A006", name: "Injection Well D-1", facilityId: "F004" },
-        { id: "A007", name: "Evaporation Pond", facilityId: "F004" },
+        { id: "A006", name: "Injection Well D-1", facilityId: "F004", assetType: "Well", installDate: "2016-11-01", condition: "Good", usefulLifeYears: 30, remainingLifeYears: 21, originalCost: 3200000, netBookValue: 2240000, lastMaintenanceDate: "2025-08-18", regulatoryCategory: "Class II Injection Well" },
+        { id: "A007", name: "Evaporation Pond", facilityId: "F004", assetType: "Impoundment", installDate: "2014-07-15", condition: "Poor", usefulLifeYears: 20, remainingLifeYears: 8, originalCost: 1800000, netBookValue: 540000, lastMaintenanceDate: "2025-12-01", regulatoryCategory: "Surface Impoundment" },
       ]},
     ],
   },
   {
     id: "S003", name: "Appalachian Basin", region: "Pennsylvania",
+    address: "450 Industrial Park Rd, Washington, PA 15301",
+    latitude: 40.1742, longitude: -80.2462,
+    siteType: "Processing",
+    operatingStatus: "Active Operations",
+    complianceStatus: "Compliant",
+    lastInspectionDate: "2025-10-08",
+    nextInspectionDate: "2026-04-08",
+    regulatoryAgency: "PA DEP",
+    permitNumbers: ["DEP-25-0034", "DEP-GP-5A-2023"],
+    totalAcreage: 950,
+    siteContacts: [
+      { name: "Tom Williams", role: "Site Manager", email: "t.williams@eom.com", phone: "(724) 555-0178" },
+    ],
+    notes: "Active groundwater treatment system for chlorinated solvents. Quarterly reporting to PA DEP.",
     facilities: [
       { id: "F005", name: "Processing Plant Gamma", siteId: "S003", assets: [
-        { id: "A008", name: "Fractionation Unit", facilityId: "F005" },
-        { id: "A009", name: "Pipeline Network G", facilityId: "F005" },
+        { id: "A008", name: "Fractionation Unit", facilityId: "F005", assetType: "Processing", installDate: "2014-09-01", condition: "Good", usefulLifeYears: 25, remainingLifeYears: 13, originalCost: 15000000, netBookValue: 7800000, lastMaintenanceDate: "2025-11-30", regulatoryCategory: "NGL Processing" },
+        { id: "A009", name: "Pipeline Network G", facilityId: "F005", assetType: "Pipeline", installDate: "2011-05-20", condition: "Decommissioned", usefulLifeYears: 30, remainingLifeYears: 0, originalCost: 8000000, netBookValue: 0, lastMaintenanceDate: "2024-06-30", regulatoryCategory: "Gathering Pipeline" },
       ]},
     ],
   },
   {
     id: "S004", name: "Gulf Coast Terminal", region: "Louisiana",
+    address: "2100 River Road, Port Allen, LA 70767",
+    latitude: 30.4515, longitude: -91.2100,
+    siteType: "Terminal & Marine",
+    operatingStatus: "Active Operations",
+    complianceStatus: "Pending Review",
+    lastInspectionDate: "2025-08-12",
+    nextInspectionDate: "2026-02-28",
+    regulatoryAgency: "Louisiana DENR / USCG",
+    permitNumbers: ["LDEQ-AI-2023-0892", "USCG-COC-4521"],
+    totalAcreage: 450,
+    siteContacts: [
+      { name: "Angela Foster", role: "Terminal Manager", email: "a.foster@eom.com", phone: "(225) 555-0312" },
+      { name: "David Kim", role: "Environmental Specialist", email: "d.kim@eom.com", phone: "(225) 555-0348" },
+    ],
+    notes: "Marine terminal with legacy petroleum contamination. Upcoming regulatory review for tank battery area.",
     facilities: [
       { id: "F006", name: "Marine Terminal", siteId: "S004", assets: [
-        { id: "A010", name: "Loading Dock 1", facilityId: "F006" },
-        { id: "A011", name: "Tank Battery", facilityId: "F006" },
+        { id: "A010", name: "Loading Dock 1", facilityId: "F006", assetType: "Marine", installDate: "2008-03-15", condition: "Fair", usefulLifeYears: 35, remainingLifeYears: 17, originalCost: 22000000, netBookValue: 11000000, lastMaintenanceDate: "2025-10-20", regulatoryCategory: "Marine Loading Facility" },
+        { id: "A011", name: "Tank Battery", facilityId: "F006", assetType: "Storage", installDate: "2010-09-01", condition: "Poor", usefulLifeYears: 30, remainingLifeYears: 14, originalCost: 9500000, netBookValue: 4275000, lastMaintenanceDate: "2025-07-15", regulatoryCategory: "Aboveground Storage" },
       ]},
     ],
   },
@@ -234,6 +370,134 @@ export const obligations: Obligation[] = [
   },
 ];
 
+// -- Environmental Exposures --
+export const environmentalExposures: EnvironmentalExposure[] = [
+  {
+    id: "EXP-001", siteId: "S001", siteName: "Eagle Ford Basin",
+    obligationId: "OBL-008", obligationName: "Soil Contamination Cleanup",
+    contaminantType: "BTEX / TPH",
+    mediaAffected: ["Soil", "Groundwater"],
+    exposureArea: 3.5,
+    riskLevel: "High",
+    estimatedCleanupCost: 920000,
+    regulatoryDriver: "TCEQ TRRP Rule",
+    discoveryDate: "2021-06-15",
+    reportingDeadline: "2026-06-15",
+    monitoringFrequency: "Quarterly",
+    lastSampleDate: "2025-12-10",
+    exceedanceCount: 4,
+    maxConcentration: "12,500 µg/kg TPH",
+    regulatoryLimit: "5,000 µg/kg TPH",
+    status: "Remediation",
+    notes: "Soil excavation planned for Q3 2026. Groundwater monitoring wells MW-1 through MW-6 active.",
+  },
+  {
+    id: "EXP-002", siteId: "S002", siteName: "Permian Basin",
+    obligationId: "OBL-007", obligationName: "Pond Remediation",
+    contaminantType: "Produced Water / Hydrocarbons",
+    mediaAffected: ["Soil", "Groundwater", "Surface Water"],
+    exposureArea: 8.2,
+    riskLevel: "Critical",
+    estimatedCleanupCost: 1380000,
+    regulatoryDriver: "NMED Groundwater Quality Bureau",
+    discoveryDate: "2019-11-20",
+    reportingDeadline: "2026-03-01",
+    monitoringFrequency: "Monthly",
+    lastSampleDate: "2026-01-15",
+    exceedanceCount: 12,
+    maxConcentration: "45,000 mg/L TDS",
+    regulatoryLimit: "10,000 mg/L TDS",
+    status: "Remediation",
+    notes: "Active pump-back system in operation. Liner replacement 60% complete. Monthly reporting to NMED.",
+  },
+  {
+    id: "EXP-003", siteId: "S003", siteName: "Appalachian Basin",
+    obligationId: "OBL-009", obligationName: "Groundwater Treatment",
+    contaminantType: "Chlorinated Solvents (TCE/PCE)",
+    mediaAffected: ["Groundwater"],
+    exposureArea: 15.0,
+    riskLevel: "High",
+    estimatedCleanupCost: 2450000,
+    regulatoryDriver: "PA DEP Act 2 Standards",
+    discoveryDate: "2018-04-22",
+    reportingDeadline: "2026-04-22",
+    monitoringFrequency: "Quarterly",
+    lastSampleDate: "2025-11-05",
+    exceedanceCount: 8,
+    maxConcentration: "85 µg/L TCE",
+    regulatoryLimit: "5 µg/L TCE",
+    status: "Remediation",
+    notes: "Pump-and-treat system operating since 2020. Plume showing signs of attenuation. 12 monitoring wells active.",
+  },
+  {
+    id: "EXP-004", siteId: "S004", siteName: "Gulf Coast Terminal",
+    obligationId: "OBL-012", obligationName: "Tank Battery Cleanup",
+    contaminantType: "Petroleum Hydrocarbons",
+    mediaAffected: ["Soil"],
+    exposureArea: 1.8,
+    riskLevel: "Medium",
+    estimatedCleanupCost: 740000,
+    regulatoryDriver: "LDEQ UST/AST Regulations",
+    discoveryDate: "2022-01-10",
+    reportingDeadline: "2026-07-10",
+    monitoringFrequency: "Semi-Annual",
+    lastSampleDate: "2025-09-22",
+    exceedanceCount: 2,
+    maxConcentration: "8,200 mg/kg DRO",
+    regulatoryLimit: "5,000 mg/kg DRO",
+    status: "Monitoring",
+    notes: "Phase II ESA completed. Delineation sampling planned for Q2 2026.",
+  },
+  {
+    id: "EXP-005", siteId: "S002", siteName: "Permian Basin",
+    contaminantType: "NORM (Naturally Occurring Radioactive Material)",
+    mediaAffected: ["Soil"],
+    exposureArea: 0.5,
+    riskLevel: "Medium",
+    estimatedCleanupCost: 280000,
+    regulatoryDriver: "NMOCD Rule 19.15.36",
+    discoveryDate: "2024-08-05",
+    reportingDeadline: "2026-08-05",
+    monitoringFrequency: "Annual",
+    lastSampleDate: "2025-08-10",
+    exceedanceCount: 1,
+    maxConcentration: "35 pCi/g Ra-226",
+    regulatoryLimit: "30 pCi/g Ra-226",
+    status: "Monitoring",
+    notes: "Elevated NORM detected at former pipe yard. Characterization ongoing.",
+  },
+];
+
+// -- ARO Tracking --
+export const aroTrackingEntries: AROTrackingEntry[] = obligations
+  .filter(o => o.type === "ARO" && o.status !== "Settled")
+  .map(o => {
+    const targetYear = new Date(o.targetSettlementDate).getFullYear();
+    const currentYear = 2026;
+    const yearsRemaining = Math.max(0, targetYear - currentYear);
+    const yearsElapsed = currentYear - new Date(o.createdDate).getFullYear();
+    const cumulativeAccretion = o.currentLiability - o.initialEstimate;
+    return {
+      obligationId: o.id,
+      obligationName: o.name,
+      assetName: o.assetName || "N/A",
+      siteName: o.siteName,
+      fairValue: o.fairValue || o.currentLiability,
+      initialEstimate: o.initialEstimate,
+      currentLiability: o.currentLiability,
+      accretionExpense: o.accretionExpense,
+      cumulativeAccretion,
+      revisionImpact: o.revisionImpact || 0,
+      discountRate: o.discountRate,
+      retirementDate: o.targetSettlementDate,
+      yearsRemaining,
+      settlementProgress: Math.min(100, Math.round((yearsElapsed / (yearsElapsed + yearsRemaining)) * 100)),
+      lastReviewDate: "2025-12-15",
+      nextReviewDate: "2026-06-15",
+      reviewNotes: `Annual review completed. ${o.revisionImpact && o.revisionImpact > 0 ? `Upward revision of ${formatCurrency(o.revisionImpact)} applied.` : o.revisionImpact && o.revisionImpact < 0 ? `Downward revision of ${formatCurrency(Math.abs(o.revisionImpact))} applied.` : "No revision required."}`,
+    };
+  });
+
 // -- Recent Activity --
 export const recentActivity: ActivityItem[] = [
   { id: "ACT-1", date: "2026-02-18", action: "Liability revised upward by $200K", obligationId: "OBL-011", obligationName: "Marine Terminal Dismantlement", type: "ARO" },
@@ -320,4 +584,17 @@ export function getObligationsByStatus() {
   const counts: Record<string, number> = {};
   obligations.forEach(o => { counts[o.status] = (counts[o.status] || 0) + 1; });
   return Object.entries(counts).map(([status, count]) => ({ status, count }));
+}
+
+// Get all assets flattened with parent references
+export function getAllAssets() {
+  const result: (Asset & { siteName: string; siteId: string; facilityName: string })[] = [];
+  sites.forEach(site => {
+    site.facilities.forEach(fac => {
+      fac.assets.forEach(asset => {
+        result.push({ ...asset, siteName: site.name, siteId: site.id, facilityName: fac.name });
+      });
+    });
+  });
+  return result;
 }
