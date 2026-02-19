@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shield, FileText, Eye, Clock, CheckCircle, AlertTriangle, Search, Download } from "lucide-react";
+import { Shield, FileText, Eye, Clock, CheckCircle, AlertTriangle, Search, Download, BrainCircuit } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import {
   AuditTrailEntry, ControlItem, DisclosureItem,
 } from "@/data/mock-data";
 import { exportToCSV, exportToPDF } from "@/lib/export-utils";
+import { AROJustificationTab } from "@/components/AROJustificationTab";
 
 const controlStatusColor: Record<string, string> = {
   Effective: "bg-chart-success/10 text-chart-success border-chart-success/30",
@@ -97,6 +98,9 @@ export default function AssuranceModule() {
           <TabsTrigger value="controls">Controls</TabsTrigger>
           <TabsTrigger value="audit">Audit Trail</TabsTrigger>
           <TabsTrigger value="disclosure">Financial Disclosure</TabsTrigger>
+          <TabsTrigger value="ai-justification" className="gap-1">
+            <BrainCircuit className="h-3.5 w-3.5" /> AI Justification
+          </TabsTrigger>
         </TabsList>
 
         {/* Reporting Dashboard */}
@@ -320,6 +324,11 @@ export default function AssuranceModule() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* AI Justification */}
+        <TabsContent value="ai-justification">
+          <AROJustificationTab />
         </TabsContent>
       </Tabs>
 
