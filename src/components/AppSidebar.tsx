@@ -5,6 +5,9 @@ import {
   Leaf,
   BarChart3,
   Settings,
+  CalendarRange,
+  CheckSquare,
+  ShieldCheck,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -25,6 +28,9 @@ const navItems = [
   { title: "Inventory", url: "/inventory", icon: Database },
   { title: "ARO", url: "/aro", icon: Landmark },
   { title: "ERO", url: "/ero", icon: Leaf },
+  { title: "Plan", url: "/plan", icon: CalendarRange },
+  { title: "Settlement", url: "/settlement", icon: CheckSquare },
+  { title: "Assurance", url: "/assurance", icon: ShieldCheck },
   { title: "Financial Reporting", url: "/reporting", icon: BarChart3 },
   { title: "Settings", url: "/settings", icon: Settings },
 ];

@@ -8,6 +8,9 @@ import Index from "./pages/Index";
 import Inventory from "./pages/Inventory";
 import AROModule from "./pages/AROModule";
 import EROModule from "./pages/EROModule";
+import PlanModule from "./pages/PlanModule";
+import SettlementModule from "./pages/SettlementModule";
+import AssuranceModule from "./pages/AssuranceModule";
 import FinancialReporting from "./pages/FinancialReporting";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
@@ -26,6 +29,9 @@ const App = () => (
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/aro" element={<AROModule />} />
             <Route path="/ero" element={<EROModule />} />
+            <Route path="/plan" element={<PlanModule />} />
+            <Route path="/settlement" element={<SettlementModule />} />
+            <Route path="/assurance" element={<AssuranceModule />} />
             <Route path="/reporting" element={<FinancialReporting />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
