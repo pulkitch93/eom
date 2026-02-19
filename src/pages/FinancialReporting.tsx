@@ -1,5 +1,6 @@
-import { BarChart3, TrendingUp } from "lucide-react";
+import { BarChart3, TrendingUp, Download, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatCard } from "@/components/StatCard";
@@ -13,6 +14,7 @@ import {
   formatCurrency,
   formatCurrencyK,
 } from "@/data/mock-data";
+import { exportToCSV, exportToPDF } from "@/lib/export-utils";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 
 export default function FinancialReporting() {
@@ -22,6 +24,66 @@ export default function FinancialReporting() {
   const totalAccretion = getTotalAccretion();
   const aroObls = getAROObligations();
   const eroObls = getEROObligations();
+
+  const siteNames = ["Eagle Ford Basin", "Permian Basin", "Appalachian Basin", "Gulf Coast Terminal"];
+
+  const exportLiabilitySite = (format: "csv" | "pdf") => {
+    const headers = ["Site", "ARO", "ERO", "Total"];
+    const rows = siteNames.map(site => {
+      const siteObls = obligations.filter(o => o.siteName === site);
+      const aro = siteObls.filter(o => o.type === "ARO").reduce((s, o) => s + o.currentLiability, 0);
+      const ero = siteObls.filter(o => o.type === "ERO").reduce((s, o) => s + o.currentLiability, 0);
+      return [site, formatCurrency(aro), formatCurrency(ero), formatCurrency(aro + ero)];
+    });
+    rows.push(["Total", formatCurrency(aroLiability), formatCurrency(eroLiability), formatCurrency(totalLiability)]);
+    format === "csv"
+      ? exportToCSV(headers, rows, "liability-by-site")
+      : exportToPDF("Liability by Site", headers, rows, "liability-by-site");
+  };
+
+  const exportASC410 = (format: "csv" | "pdf") => {
+    const headers = ["Description", "Beginning Balance", "Accretion", "Revisions", "Settlements", "Ending Balance"];
+    const activeARO = aroObls.filter(o => o.status !== "Settled");
+    const rows = activeARO.map(o => [
+      o.name,
+      formatCurrency(o.currentLiability - o.accretionExpense - (o.revisionImpact || 0)),
+      formatCurrency(o.accretionExpense),
+      formatCurrency(o.revisionImpact || 0),
+      "$0",
+      formatCurrency(o.currentLiability),
+    ]);
+    rows.push([
+      "Total ARO",
+      formatCurrency(activeARO.reduce((s, o) => s + o.currentLiability - o.accretionExpense - (o.revisionImpact || 0), 0)),
+      formatCurrency(getTotalAccretion("ARO")),
+      formatCurrency(aroObls.reduce((s, o) => s + (o.revisionImpact || 0), 0)),
+      "$0",
+      formatCurrency(aroLiability),
+    ]);
+    format === "csv"
+      ? exportToCSV(headers, rows, "asc-410-disclosure")
+      : exportToPDF("ASC 410-20 — Asset Retirement Obligations Disclosure", headers, rows, "asc-410-disclosure");
+  };
+
+  const exportASC450 = (format: "csv" | "pdf") => {
+    const headers = ["Obligation", "Contaminant", "Phase", "Accrued Liability", "Regulatory Deadline", "Progress"];
+    const rows = eroObls.map(o => [
+      o.name, o.contaminantType || "", o.remediationPhase || "",
+      formatCurrency(o.currentLiability), o.regulatoryDeadline || "", `${o.remediationProgress}%`,
+    ]);
+    rows.push(["Total ERO", "", "", formatCurrency(eroLiability), "", ""]);
+    format === "csv"
+      ? exportToCSV(headers, rows, "asc-450-disclosure")
+      : exportToPDF("ASC 450-20 — Environmental Remediation Obligations", headers, rows, "asc-450-disclosure");
+  };
+
+  const exportForecast = (format: "csv" | "pdf") => {
+    const headers = ["Year", "ARO", "ERO", "Total"];
+    const rows = forecastData.map(d => [d.year.toString(), formatCurrency(d.aro), formatCurrency(d.ero), formatCurrency(d.aro + d.ero)]);
+    format === "csv"
+      ? exportToCSV(headers, rows, "liability-forecast")
+      : exportToPDF("Liability Forecast (2026–2036)", headers, rows, "liability-forecast");
+  };
 
   return (
     <div className="space-y-6">
@@ -44,9 +106,13 @@ export default function FinancialReporting() {
 
         <TabsContent value="overview">
           <div className="grid gap-4 lg:grid-cols-2">
-            {/* By Site */}
             <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Liability by Site</CardTitle></CardHeader>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium">Liability by Site</CardTitle>
+                  <ExportButtons onCSV={() => exportLiabilitySite("csv")} onPDF={() => exportLiabilitySite("pdf")} />
+                </div>
+              </CardHeader>
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
@@ -58,7 +124,7 @@ export default function FinancialReporting() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {["Eagle Ford Basin", "Permian Basin", "Appalachian Basin", "Gulf Coast Terminal"].map(site => {
+                    {siteNames.map(site => {
                       const siteObls = obligations.filter(o => o.siteName === site);
                       const aro = siteObls.filter(o => o.type === "ARO").reduce((s, o) => s + o.currentLiability, 0);
                       const ero = siteObls.filter(o => o.type === "ERO").reduce((s, o) => s + o.currentLiability, 0);
@@ -82,7 +148,6 @@ export default function FinancialReporting() {
               </CardContent>
             </Card>
 
-            {/* PV Summary */}
             <Card>
               <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Present Value Summary</CardTitle></CardHeader>
               <CardContent className="p-0">
@@ -113,7 +178,12 @@ export default function FinancialReporting() {
 
         <TabsContent value="asc410">
           <Card>
-            <CardHeader><CardTitle className="text-sm font-medium">ASC 410-20 — Asset Retirement Obligations Disclosure</CardTitle></CardHeader>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium">ASC 410-20 — Asset Retirement Obligations Disclosure</CardTitle>
+                <ExportButtons onCSV={() => exportASC410("csv")} onPDF={() => exportASC410("pdf")} />
+              </div>
+            </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
@@ -153,7 +223,12 @@ export default function FinancialReporting() {
 
         <TabsContent value="asc450">
           <Card>
-            <CardHeader><CardTitle className="text-sm font-medium">ASC 450-20 — Environmental Remediation Obligations</CardTitle></CardHeader>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium">ASC 450-20 — Environmental Remediation Obligations</CardTitle>
+                <ExportButtons onCSV={() => exportASC450("csv")} onPDF={() => exportASC450("pdf")} />
+              </div>
+            </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
@@ -190,7 +265,12 @@ export default function FinancialReporting() {
 
         <TabsContent value="forecast">
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Liability Forecast (2026–2036)</CardTitle></CardHeader>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium">Liability Forecast (2026–2036)</CardTitle>
+                <ExportButtons onCSV={() => exportForecast("csv")} onPDF={() => exportForecast("pdf")} />
+              </div>
+            </CardHeader>
             <CardContent>
               <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -209,6 +289,19 @@ export default function FinancialReporting() {
           </Card>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function ExportButtons({ onCSV, onPDF }: { onCSV: () => void; onPDF: () => void }) {
+  return (
+    <div className="flex items-center gap-1">
+      <Button variant="outline" size="sm" className="h-7 text-[10px] gap-1" onClick={onCSV}>
+        <Download className="h-3 w-3" /> CSV
+      </Button>
+      <Button variant="outline" size="sm" className="h-7 text-[10px] gap-1" onClick={onPDF}>
+        <FileText className="h-3 w-3" /> PDF
+      </Button>
     </div>
   );
 }
