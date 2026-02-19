@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shield, FileText, Eye, Clock, CheckCircle, AlertTriangle, Search } from "lucide-react";
+import { Shield, FileText, Eye, Clock, CheckCircle, AlertTriangle, Search, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -7,10 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import {
   auditTrail, controlItems, disclosureItems,
   AuditTrailEntry, ControlItem, DisclosureItem,
 } from "@/data/mock-data";
+import { exportToCSV, exportToPDF } from "@/lib/export-utils";
 
 const controlStatusColor: Record<string, string> = {
   Effective: "bg-chart-success/10 text-chart-success border-chart-success/30",
@@ -53,6 +55,30 @@ export default function AssuranceModule() {
 
   const effectiveControls = controlItems.filter(c => c.status === "Effective").length;
   const completedDisclosures = disclosureItems.filter(d => d.status === "Complete").length;
+
+  const exportAuditTrail = (format: "csv" | "pdf") => {
+    const headers = ["Timestamp", "User", "Action", "Category", "Entity", "Details"];
+    const rows = filteredAudit.map(e => [e.timestamp, e.user, e.action, e.category, e.entityId, e.details]);
+    format === "csv"
+      ? exportToCSV(headers, rows, "audit-trail")
+      : exportToPDF("Audit Trail", headers, rows, "audit-trail");
+  };
+
+  const exportControls = (format: "csv" | "pdf") => {
+    const headers = ["Control", "Category", "Frequency", "Owner", "Status", "Risk", "Last Tested", "Next Test", "Findings"];
+    const rows = controlItems.map(c => [c.controlName, c.category, c.frequency, c.owner, c.status, c.riskRating, c.lastTestedDate, c.nextTestDate, c.findings]);
+    format === "csv"
+      ? exportToCSV(headers, rows, "internal-controls")
+      : exportToPDF("Internal Controls", headers, rows, "internal-controls");
+  };
+
+  const exportDisclosures = (format: "csv" | "pdf") => {
+    const headers = ["Standard", "Requirement", "Description", "Status", "Owner", "Due Date", "Completed", "Notes"];
+    const rows = disclosureItems.map(d => [d.standard, d.requirement, d.description, d.status, d.responsibleParty, d.dueDate, d.completedDate || "—", d.notes]);
+    format === "csv"
+      ? exportToCSV(headers, rows, "financial-disclosures")
+      : exportToPDF("Financial Disclosure Checklist", headers, rows, "financial-disclosures");
+  };
 
   return (
     <div className="space-y-6">
@@ -156,7 +182,10 @@ export default function AssuranceModule() {
         <TabsContent value="controls">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Internal Controls</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium">Internal Controls</CardTitle>
+                <ExportButtons onCSV={() => exportControls("csv")} onPDF={() => exportControls("pdf")} />
+              </div>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
@@ -203,6 +232,7 @@ export default function AssuranceModule() {
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <CardTitle className="text-sm font-medium">Audit Trail</CardTitle>
                 <div className="flex items-center gap-2">
+                  <ExportButtons onCSV={() => exportAuditTrail("csv")} onPDF={() => exportAuditTrail("pdf")} />
                   <div className="relative">
                     <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                     <Input placeholder="Search…" className="pl-8 h-9 w-48 text-xs" value={auditSearch} onChange={e => setAuditSearch(e.target.value)} />
@@ -254,7 +284,10 @@ export default function AssuranceModule() {
         <TabsContent value="disclosure">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Financial Disclosure Checklist</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium">Financial Disclosure Checklist</CardTitle>
+                <ExportButtons onCSV={() => exportDisclosures("csv")} onPDF={() => exportDisclosures("pdf")} />
+              </div>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
@@ -357,5 +390,18 @@ function StatusBadge({ status, colors }: { status: string; colors: Record<string
     <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${colors[status] || "bg-muted text-muted-foreground border-border"}`}>
       {status}
     </span>
+  );
+}
+
+function ExportButtons({ onCSV, onPDF }: { onCSV: () => void; onPDF: () => void }) {
+  return (
+    <div className="flex items-center gap-1">
+      <Button variant="outline" size="sm" className="h-7 text-[10px] gap-1" onClick={onCSV}>
+        <Download className="h-3 w-3" /> CSV
+      </Button>
+      <Button variant="outline" size="sm" className="h-7 text-[10px] gap-1" onClick={onPDF}>
+        <FileText className="h-3 w-3" /> PDF
+      </Button>
+    </div>
   );
 }
