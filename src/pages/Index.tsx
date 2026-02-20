@@ -159,33 +159,6 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <Activity className="h-4 w-4" /> Recent Activity
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {recentActivity.map((item) => (
-              <div key={item.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
-                <div className="flex items-center gap-3">
-                  <Badge variant={item.type === "ARO" ? "default" : "secondary"} className="text-[10px] w-10 justify-center">
-                    {item.type}
-                  </Badge>
-                  <div>
-                    <p className="text-sm font-medium">{item.obligationName}</p>
-                    <p className="text-xs text-muted-foreground">{item.action}</p>
-                  </div>
-                </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">{item.date}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Risk Score Widget */}
       <Card className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => navigate("/risk")}>
         <CardHeader className="pb-2">
@@ -231,6 +204,33 @@ const Dashboard = () => {
               </div>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Recent Activity */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <Activity className="h-4 w-4" /> Recent Activity
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {recentActivity.map((item) => (
+              <div key={item.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
+                <div className="flex items-center gap-3">
+                  <Badge variant={item.type === "ARO" ? "default" : "secondary"} className="text-[10px] w-10 justify-center">
+                    {item.type}
+                  </Badge>
+                  <div>
+                    <p className="text-sm font-medium">{item.obligationName}</p>
+                    <p className="text-xs text-muted-foreground">{item.action}</p>
+                  </div>
+                </div>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">{item.date}</span>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
