@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Landmark, Leaf, DollarSign, TrendingUp, Activity, BrainCircuit, Sparkles } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Landmark, Leaf, DollarSign, TrendingUp, Activity, BrainCircuit, Sparkles, ShieldAlert, TrendingDown, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,12 +30,28 @@ import {
   Cell,
 } from "recharts";
 import { useNavigate } from "react-router-dom";
+import { calculatePortfolioRisk, type RiskLevel } from "@/lib/risk-scoring-engine";
 
 const STATUS_COLORS = ["hsl(187, 60%, 38%)", "hsl(38, 92%, 50%)", "hsl(152, 55%, 42%)", "hsl(215, 14%, 50%)"];
+
+const RISK_COLORS: Record<RiskLevel, string> = {
+  Low: "hsl(152, 55%, 42%)",
+  Moderate: "hsl(38, 92%, 50%)",
+  High: "hsl(32, 80%, 50%)",
+  Critical: "hsl(0, 72%, 51%)",
+};
+
+const RISK_BG: Record<RiskLevel, string> = {
+  Low: "bg-chart-success/10 text-chart-success border-chart-success/30",
+  Moderate: "bg-chart-warning/10 text-chart-warning border-chart-warning/30",
+  High: "bg-chart-ero/10 text-chart-ero border-chart-ero/30",
+  Critical: "bg-destructive/10 text-destructive border-destructive/30",
+};
 
 const Dashboard = () => {
   const [copilotOpen, setCopilotOpen] = useState(false);
   const navigate = useNavigate();
+  const riskResult = useMemo(() => calculatePortfolioRisk(), []);
   const totalARO = getTotalLiability("ARO");
   const totalERO = getTotalLiability("ERO");
   const totalCombined = getTotalLiability();
@@ -169,6 +185,55 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Risk Score Widget */}
+      <Card className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => navigate("/risk")}>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <ShieldAlert className="h-4 w-4" style={{ color: RISK_COLORS[riskResult.portfolioLevel] }} /> Executive Risk Score
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-6">
+            <div className="text-center">
+              <p className="text-3xl font-bold" style={{ color: RISK_COLORS[riskResult.portfolioLevel] }}>{riskResult.portfolioScore}</p>
+              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium mt-1 ${RISK_BG[riskResult.portfolioLevel]}`}>
+                {riskResult.portfolioLevel}
+              </span>
+            </div>
+            <div className="flex-1 grid grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase">Volatility</p>
+                <p className="text-sm font-bold">{riskResult.exposureVolatility}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase">Confidence</p>
+                <p className="text-sm font-bold">{riskResult.forecastConfidence}%</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase">Trend</p>
+                <div className="flex items-center justify-center gap-1">
+                  {riskResult.portfolioTrend === "Deteriorating" && <TrendingUp className="h-3 w-3 text-destructive" />}
+                  {riskResult.portfolioTrend === "Improving" && <TrendingDown className="h-3 w-3 text-chart-success" />}
+                  {riskResult.portfolioTrend === "Stable" && <Minus className="h-3 w-3 text-muted-foreground" />}
+                  <p className="text-xs font-medium">{riskResult.portfolioTrend}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {riskResult.topDrivers.length > 0 && (
+            <div className="mt-3 pt-3 border-t">
+              <p className="text-[10px] text-muted-foreground mb-1.5">Top Risk Drivers</p>
+              <div className="flex flex-wrap gap-1.5">
+                {riskResult.topDrivers.slice(0, 3).map((d, i) => (
+                  <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{d.driver}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* AI Copilot Widget */}
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/30">
         <CardHeader className="pb-2">
