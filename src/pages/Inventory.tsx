@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   ChevronRight, ChevronDown, MapPin, Building2, Box, Search,
   Globe, Phone, Mail, Calendar, Shield, AlertTriangle, TrendingUp,
-  Wrench, FileText, Activity
+  Wrench, FileText, Activity, Brain
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import {
   environmentalExposures, aroTrackingEntries, getAllAssets,
   Site, EnvironmentalExposure, AROTrackingEntry
 } from "@/data/mock-data";
+import ObligationClassificationTab from "@/components/ObligationClassificationTab";
 
 const statusColor: Record<string, string> = {
   Active: "bg-chart-success/10 text-chart-success border-chart-success/30",
@@ -130,12 +131,13 @@ export default function Inventory() {
 
         {/* Main Content with Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="registry" className="text-xs"><FileText className="h-3.5 w-3.5 mr-1" />Registry</TabsTrigger>
             <TabsTrigger value="sites" className="text-xs"><MapPin className="h-3.5 w-3.5 mr-1" />Site Data</TabsTrigger>
             <TabsTrigger value="assets" className="text-xs"><Box className="h-3.5 w-3.5 mr-1" />Assets</TabsTrigger>
             <TabsTrigger value="aro" className="text-xs"><TrendingUp className="h-3.5 w-3.5 mr-1" />ARO Tracking</TabsTrigger>
             <TabsTrigger value="exposure" className="text-xs"><AlertTriangle className="h-3.5 w-3.5 mr-1" />Exposure</TabsTrigger>
+            <TabsTrigger value="ai-classify" className="text-xs"><Brain className="h-3.5 w-3.5 mr-1" />AI Classify</TabsTrigger>
           </TabsList>
 
           {/* ===== REGISTRY TAB ===== */}
@@ -445,6 +447,11 @@ export default function Inventory() {
                 </CardContent>
               </Card>
             ))}
+          </TabsContent>
+
+          {/* ===== AI CLASSIFY TAB ===== */}
+          <TabsContent value="ai-classify">
+            <ObligationClassificationTab />
           </TabsContent>
         </Tabs>
       </div>
