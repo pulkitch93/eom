@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { TrendingUp, Calendar, DollarSign, Target, ArrowUpDown } from "lucide-react";
+import { TrendingUp, Calendar, DollarSign, Target, ArrowUpDown, Brain } from "lucide-react";
+import ScenarioSimulatorTab from "@/components/ScenarioSimulatorTab";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -43,6 +44,7 @@ export default function PlanModule() {
           <TabsTrigger value="modeling">Liability Modeling</TabsTrigger>
           <TabsTrigger value="projections">Cost Projections</TabsTrigger>
           <TabsTrigger value="budget">Budget Alignment</TabsTrigger>
+          <TabsTrigger value="simulator"><Brain className="h-3 w-3 mr-1" />Scenario Simulator</TabsTrigger>
         </TabsList>
 
         {/* Multi-Year Forecast */}
@@ -256,6 +258,9 @@ export default function PlanModule() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="simulator">
+          <ScenarioSimulatorTab />
         </TabsContent>
       </Tabs>
     </div>
