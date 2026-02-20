@@ -8,6 +8,7 @@ import {
   CalendarRange,
   CheckSquare,
   ShieldCheck,
+  Radio,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -32,6 +33,7 @@ const navItems = [
   { title: "Settlement", url: "/settlement", icon: CheckSquare },
   { title: "Assurance", url: "/assurance", icon: ShieldCheck },
   { title: "Financial Reporting", url: "/reporting", icon: BarChart3 },
+  { title: "Regulatory Intelligence", url: "/regulatory", icon: Radio },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
