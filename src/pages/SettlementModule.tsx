@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DollarSign, Users, CheckCircle, Clock, TrendingUp } from "lucide-react";
+import { DollarSign, Users, CheckCircle, Clock, TrendingUp, Brain } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Progress } from "@/components/ui/progress";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { settlementProjects, SettlementProject, formatCurrency, formatCurrencyK } from "@/data/mock-data";
+import VarianceIntelligenceTab from "@/components/VarianceIntelligenceTab";
 
 const projectStatusColor: Record<string, string> = {
   "Planning": "bg-primary/10 text-primary border-primary/30",
@@ -40,6 +41,7 @@ export default function SettlementModule() {
           <TabsTrigger value="vendors">Vendor Payments</TabsTrigger>
           <TabsTrigger value="bva">Budget vs Actuals</TabsTrigger>
           <TabsTrigger value="closure">Financial Closure</TabsTrigger>
+          <TabsTrigger value="variance" className="flex items-center gap-1.5"><Brain className="h-3.5 w-3.5" /> Variance Intelligence</TabsTrigger>
         </TabsList>
 
         {/* Project Cost Tracking */}
@@ -234,6 +236,11 @@ export default function SettlementModule() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Variance Intelligence */}
+        <TabsContent value="variance">
+          <VarianceIntelligenceTab />
         </TabsContent>
       </Tabs>
 
