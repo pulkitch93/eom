@@ -13,6 +13,7 @@ import SettlementModule from "./pages/SettlementModule";
 import AssuranceModule from "./pages/AssuranceModule";
 import FinancialReporting from "./pages/FinancialReporting";
 import RegulatoryIntelligence from "./pages/RegulatoryIntelligence";
+import RiskIntelligence from "./pages/RiskIntelligence";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/assurance" element={<AssuranceModule />} />
             <Route path="/reporting" element={<FinancialReporting />} />
             <Route path="/regulatory" element={<RegulatoryIntelligence />} />
+            <Route path="/risk" element={<RiskIntelligence />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
