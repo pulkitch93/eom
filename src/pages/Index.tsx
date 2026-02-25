@@ -169,37 +169,37 @@ const Dashboard = () => {
         <CardContent>
           <div className="flex items-center gap-6">
             <div className="text-center">
-              <p className="text-3xl font-bold" style={{ color: RISK_COLORS[riskResult.portfolioLevel] }}>{riskResult.portfolioScore}</p>
-              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium mt-1 ${RISK_BG[riskResult.portfolioLevel]}`}>
+              <p className="text-2xl font-bold" style={{ color: RISK_COLORS[riskResult.portfolioLevel] }}>{riskResult.portfolioScore}</p>
+              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium mt-1 ${RISK_BG[riskResult.portfolioLevel]}`}>
                 {riskResult.portfolioLevel}
               </span>
             </div>
             <div className="flex-1 grid grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase">Volatility</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Volatility</p>
                 <p className="text-sm font-bold">{riskResult.exposureVolatility}</p>
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase">Confidence</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Confidence</p>
                 <p className="text-sm font-bold">{riskResult.forecastConfidence}%</p>
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase">Trend</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Trend</p>
                 <div className="flex items-center justify-center gap-1">
-                  {riskResult.portfolioTrend === "Deteriorating" && <TrendingUp className="h-3 w-3 text-destructive" />}
-                  {riskResult.portfolioTrend === "Improving" && <TrendingDown className="h-3 w-3 text-chart-success" />}
-                  {riskResult.portfolioTrend === "Stable" && <Minus className="h-3 w-3 text-muted-foreground" />}
-                  <p className="text-xs font-medium">{riskResult.portfolioTrend}</p>
+                  {riskResult.portfolioTrend === "Deteriorating" && <TrendingUp className="h-3.5 w-3.5 text-destructive" />}
+                  {riskResult.portfolioTrend === "Improving" && <TrendingDown className="h-3.5 w-3.5 text-chart-success" />}
+                  {riskResult.portfolioTrend === "Stable" && <Minus className="h-3.5 w-3.5 text-muted-foreground" />}
+                  <p className="text-sm font-medium">{riskResult.portfolioTrend}</p>
                 </div>
               </div>
             </div>
           </div>
           {riskResult.topDrivers.length > 0 && (
             <div className="mt-3 pt-3 border-t">
-              <p className="text-[10px] text-muted-foreground mb-1.5">Top Risk Drivers</p>
+              <p className="text-xs font-medium text-muted-foreground mb-1.5">Top Risk Drivers</p>
               <div className="flex flex-wrap gap-1.5">
                 {riskResult.topDrivers.slice(0, 3).map((d, i) => (
-                  <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{d.driver}</span>
+                  <span key={i} className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">{d.driver}</span>
                 ))}
               </div>
             </div>
