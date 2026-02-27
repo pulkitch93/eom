@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Radio,
   ShieldAlert,
+  FileText,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -36,6 +37,7 @@ const navItems = [
   { title: "Financial Reporting", url: "/reporting", icon: BarChart3 },
   { title: "Regulatory Intelligence", url: "/regulatory", icon: Radio },
   { title: "Risk Intelligence", url: "/risk", icon: ShieldAlert },
+  { title: "Invoices", url: "/invoices", icon: FileText },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
