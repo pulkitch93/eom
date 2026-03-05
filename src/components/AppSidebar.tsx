@@ -11,6 +11,7 @@ import {
   Radio,
   ShieldAlert,
   FileText,
+  ArrowLeftRight,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -39,6 +40,7 @@ const navItems = [
   { title: "Risk Intelligence", url: "/risk", icon: ShieldAlert },
   { title: "Invoices", url: "/invoices", icon: FileText },
   { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Data Mapping", url: "/settings/data-mapping", icon: ArrowLeftRight },
 ];
 
 export function AppSidebar() {

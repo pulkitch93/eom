@@ -17,6 +17,7 @@ import RegulatoryIntelligence from "./pages/RegulatoryIntelligence";
 import RiskIntelligence from "./pages/RiskIntelligence";
 import InvoiceHub from "./pages/InvoiceHub";
 import SettingsPage from "./pages/SettingsPage";
+import DataMapping from "./pages/DataMapping";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,7 +42,8 @@ const App = () => (
               <Route path="/regulatory" element={<RegulatoryIntelligence />} />
               <Route path="/risk" element={<RiskIntelligence />} />
               <Route path="/invoices" element={<InvoiceHub />} />
-              <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings/data-mapping" element={<DataMapping />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,13 +1,16 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { ArrowLeftRight } from "lucide-react";
 import CustomFieldsManager from "@/components/settings/CustomFieldsManager";
 
 export default function SettingsPage() {
+  const navigate = useNavigate();
   const [discountRate, setDiscountRate] = useState("5.0");
   const [inflation, setInflation] = useState("2.5");
   const [currency, setCurrency] = useState("USD");
@@ -53,6 +56,20 @@ export default function SettingsPage() {
       </Card>
 
       <CustomFieldsManager />
+
+      <Card className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => navigate("/settings/data-mapping")}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <ArrowLeftRight className="h-4 w-4" /> Data Mapping
+              </CardTitle>
+              <CardDescription>Map incoming ERP/API/CSV fields to EOM fields with reusable mapping profiles.</CardDescription>
+            </div>
+            <Button size="sm" variant="outline" className="shrink-0">Open →</Button>
+          </div>
+        </CardHeader>
+      </Card>
 
       <Card>
         <CardHeader>
