@@ -182,6 +182,46 @@ export default function AROModule() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Obligation Detail Sheet with Custom Fields */}
+      <Sheet open={!!selectedObligation} onOpenChange={() => setSelectedObligation(null)}>
+        <SheetContent className="sm:max-w-md overflow-auto">
+          {selectedObl && (
+            <>
+              <SheetHeader>
+                <SheetTitle className="text-sm">{selectedObl.name}</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4 space-y-3 text-sm">
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">ID</span>
+                  <span className="font-mono text-xs">{selectedObl.id}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Site</span>
+                  <span className="font-medium">{selectedObl.siteName}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Status</span>
+                  <Badge variant="outline" className="text-[10px]">{selectedObl.status}</Badge>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Fair Value</span>
+                  <span className="font-mono">{formatCurrency(selectedObl.fairValue || 0)}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Accretion</span>
+                  <span className="font-mono">{formatCurrency(selectedObl.accretionExpense)}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Settlement Date</span>
+                  <span>{selectedObl.targetSettlementDate}</span>
+                </div>
+                <CustomFieldsEditor recordId={selectedObl.id} />
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
