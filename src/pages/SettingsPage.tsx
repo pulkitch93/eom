@@ -10,6 +10,7 @@ import { ArrowLeftRight } from "lucide-react";
 import CustomFieldsManager from "@/components/settings/CustomFieldsManager";
 
 export default function SettingsPage() {
+  const navigate = useNavigate();
   const [discountRate, setDiscountRate] = useState("5.0");
   const [inflation, setInflation] = useState("2.5");
   const [currency, setCurrency] = useState("USD");
