@@ -57,6 +57,20 @@ export default function SettingsPage() {
 
       <CustomFieldsManager />
 
+      <Card className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => navigate("/settings/data-mapping")}>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <ArrowLeftRight className="h-4 w-4" /> Data Mapping
+              </CardTitle>
+              <CardDescription>Map incoming ERP/API/CSV fields to EOM fields with reusable mapping profiles.</CardDescription>
+            </div>
+            <Button size="sm" variant="outline" className="shrink-0">Open →</Button>
+          </div>
+        </CardHeader>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-sm font-medium">Site Hierarchy</CardTitle>
