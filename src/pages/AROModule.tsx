@@ -78,7 +78,7 @@ export default function AROModule() {
                 </TableHeader>
                 <TableBody>
                   {aroObligations.map((o) => (
-                    <TableRow key={o.id}>
+                    <TableRow key={o.id} className="cursor-pointer" onClick={() => setSelectedObligation(o.id)}>
                       <TableCell className="text-xs font-mono">{o.id}</TableCell>
                       <TableCell className="text-xs font-medium">{o.name}</TableCell>
                       <TableCell className="text-xs">{o.siteName}</TableCell>
