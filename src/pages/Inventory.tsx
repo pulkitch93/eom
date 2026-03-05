@@ -18,6 +18,7 @@ import {
   Site, EnvironmentalExposure, AROTrackingEntry
 } from "@/data/mock-data";
 import ObligationClassificationTab from "@/components/ObligationClassificationTab";
+import CustomFieldsEditor from "@/components/CustomFieldsEditor";
 
 const statusColor: Record<string, string> = {
   Active: "bg-chart-success/10 text-chart-success border-chart-success/30",
