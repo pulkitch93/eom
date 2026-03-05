@@ -38,6 +38,8 @@ export default function AROModule() {
   const [selectedForSchedule, setSelectedForSchedule] = useState(firstActive?.id || "");
   const scheduleObl = aroObligations.find(o => o.id === selectedForSchedule);
   const schedule = scheduleObl ? generateAccretionSchedule(scheduleObl) : [];
+  const [selectedObligation, setSelectedObligation] = useState<string | null>(null);
+  const selectedObl = aroObligations.find(o => o.id === selectedObligation);
 
   return (
     <div className="space-y-6">
