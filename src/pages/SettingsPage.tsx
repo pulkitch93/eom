@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import CustomFieldsManager from "@/components/settings/CustomFieldsManager";
 
 export default function SettingsPage() {
   const [discountRate, setDiscountRate] = useState("5.0");
@@ -16,7 +17,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6 max-w-3xl">
       <h1 className="text-2xl font-bold">Settings</h1>
 
       <Card>
@@ -50,6 +51,8 @@ export default function SettingsPage() {
           <Button size="sm" onClick={handleSave}>Save Settings</Button>
         </CardContent>
       </Card>
+
+      <CustomFieldsManager />
 
       <Card>
         <CardHeader>
