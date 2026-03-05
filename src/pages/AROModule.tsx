@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import CustomFieldsEditor from "@/components/CustomFieldsEditor";
 import { StatCard } from "@/components/StatCard";
 import {
   getAROObligations,
@@ -36,6 +38,8 @@ export default function AROModule() {
   const [selectedForSchedule, setSelectedForSchedule] = useState(firstActive?.id || "");
   const scheduleObl = aroObligations.find(o => o.id === selectedForSchedule);
   const schedule = scheduleObl ? generateAccretionSchedule(scheduleObl) : [];
+  const [selectedObligation, setSelectedObligation] = useState<string | null>(null);
+  const selectedObl = aroObligations.find(o => o.id === selectedObligation);
 
   return (
     <div className="space-y-6">
@@ -74,7 +78,7 @@ export default function AROModule() {
                 </TableHeader>
                 <TableBody>
                   {aroObligations.map((o) => (
-                    <TableRow key={o.id}>
+                    <TableRow key={o.id} className="cursor-pointer" onClick={() => setSelectedObligation(o.id)}>
                       <TableCell className="text-xs font-mono">{o.id}</TableCell>
                       <TableCell className="text-xs font-medium">{o.name}</TableCell>
                       <TableCell className="text-xs">{o.siteName}</TableCell>
@@ -178,6 +182,46 @@ export default function AROModule() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Obligation Detail Sheet with Custom Fields */}
+      <Sheet open={!!selectedObligation} onOpenChange={() => setSelectedObligation(null)}>
+        <SheetContent className="sm:max-w-md overflow-auto">
+          {selectedObl && (
+            <>
+              <SheetHeader>
+                <SheetTitle className="text-sm">{selectedObl.name}</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4 space-y-3 text-sm">
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">ID</span>
+                  <span className="font-mono text-xs">{selectedObl.id}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Site</span>
+                  <span className="font-medium">{selectedObl.siteName}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Status</span>
+                  <Badge variant="outline" className="text-[10px]">{selectedObl.status}</Badge>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Fair Value</span>
+                  <span className="font-mono">{formatCurrency(selectedObl.fairValue || 0)}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Accretion</span>
+                  <span className="font-mono">{formatCurrency(selectedObl.accretionExpense)}</span>
+                </div>
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">Settlement Date</span>
+                  <span>{selectedObl.targetSettlementDate}</span>
+                </div>
+                <CustomFieldsEditor recordId={selectedObl.id} />
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
