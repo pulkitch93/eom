@@ -17,6 +17,7 @@ import RegulatoryIntelligence from "./pages/RegulatoryIntelligence";
 import RiskIntelligence from "./pages/RiskIntelligence";
 import InvoiceHub from "./pages/InvoiceHub";
 import SettingsPage from "./pages/SettingsPage";
+import DataMapping from "./pages/DataMapping";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
