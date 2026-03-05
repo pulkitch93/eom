@@ -42,7 +42,8 @@ const App = () => (
               <Route path="/regulatory" element={<RegulatoryIntelligence />} />
               <Route path="/risk" element={<RiskIntelligence />} />
               <Route path="/invoices" element={<InvoiceHub />} />
-              <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings/data-mapping" element={<DataMapping />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
