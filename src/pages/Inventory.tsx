@@ -486,6 +486,7 @@ export default function Inventory() {
                   <p className="text-xs font-medium text-muted-foreground mb-1">Description</p>
                   <p className="text-sm">{selectedObligation.description}</p>
                 </div>
+                <CustomFieldsEditor recordId={selectedObligation.id} />
               </div>
             </>
           )}
