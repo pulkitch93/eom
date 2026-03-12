@@ -68,10 +68,10 @@ const Dashboard = () => {
         </div>
         <div className="flex gap-2">
           <Button size="sm" onClick={() => navigate("/aro")}>
-            <Landmark className="mr-1 h-4 w-4" /> New ARO
+            <Landmark className="mr-1 h-4 w-4" /> ARO
           </Button>
           <Button size="sm" variant="outline" onClick={() => navigate("/ero")}>
-            <Leaf className="mr-1 h-4 w-4" /> New ERO
+            <Leaf className="mr-1 h-4 w-4" /> ERO
           </Button>
         </div>
       </div>
