@@ -66,14 +66,6 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <p className="text-sm text-muted-foreground">Environmental obligation overview — Q1 2026</p>
         </div>
-        <div className="flex gap-2">
-          <Button size="sm" onClick={() => navigate("/aro")}>
-            <Landmark className="mr-1 h-4 w-4" /> New ARO
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => navigate("/ero")}>
-            <Leaf className="mr-1 h-4 w-4" /> New ERO
-          </Button>
-        </div>
       </div>
 
       {/* Summary Cards */}
